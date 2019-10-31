@@ -12,11 +12,16 @@ def read_dot_env(envs_root)
   puts "going to read env file from root folder #{envs_root}"
 
   # pick a custom env file if set
-  if File.exist?('/tmp/envfile')
-    custom_env = true
+  # check .envfile under project_dir/.envfile first. This path is under the project dir which allow concurrent iOS building in CI. This will take precendence over /tmp/envfile. 
+  project_envfile_path = File.join(envs_root,'/ios/.envfile')
+  if File.exist?(project_envfile_path)
+    custom_env = project_envfile_path
+    file = File.read(project_envfile_path).strip
+  elsif File.exist?('/tmp/envfile')
+    custom_env = "/tmp/envfile"
     file = File.read('/tmp/envfile').strip
   else
-    custom_env = false
+    custom_env = nil
     file = ENV['ENVFILE'] || defaultEnvFile
   end
 
